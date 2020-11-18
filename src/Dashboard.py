@@ -5,10 +5,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-
 import pandas as pd
 import plotly.express as px
-
 
 app = dash.Dash(__name__)
 
@@ -16,11 +14,9 @@ entries = os.listdir('../data/Analysis/')
 
 # ------------------------------------------------------------------------------
 # Import and clean data (importing csv into pandas)
-df = pd.read_csv("../data/Analysis/Baseball_results.csv")
+# df = pd.read_csv("../data/Analysis/Baseball_results.csv", parse_dates=['Datetime'],
+#                  date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
 
-df['Datetime'] = pd.to_datetime(df["Datetime"])
-
-df.reset_index(inplace=True)
 print(df[:5])
 
 # ------------------------------------------------------------------------------
@@ -61,6 +57,7 @@ app.layout = html.Div([
     )
 ], style={'width': '100%', 'display': 'inline-block', 'padding': '0 20'})
 
+
 @app.callback(
     [Output(component_id='uncg_graph', component_property='figure')],
     [Input(component_id='slct_meter', component_property='value')],
@@ -73,10 +70,11 @@ def update_graph(slct_meter, slct_period, slct_consum):
     df['Datetime'] = pd.to_datetime(df["Datetime"])
 
     fig = px.scatter(x=df['Datetime'].year,
-                y=df['Actual'],
-                # hover_name=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name']
-                )
+                     y=df['Actual'],
+                     # hover_name=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name']
+                     )
     return fig
+
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
