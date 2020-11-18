@@ -1,13 +1,18 @@
-import pandas as pd
-import plotly.express as px  # (version 4.7.0)
-import plotly.graph_objects as go
+import os
 
 import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
+
+import pandas as pd
+import plotly.express as px
+
+
 app = dash.Dash(__name__)
+
+entries = os.listdir('../data/Analysis/')
 
 # ------------------------------------------------------------------------------
 # Import and clean data (importing csv into pandas)
@@ -15,7 +20,6 @@ df = pd.read_csv("../data/Analysis/Baseball_results.csv")
 
 df['Datetime'] = pd.to_datetime(df["Datetime"])
 
-print(df)
 df.reset_index(inplace=True)
 print(df[:5])
 
@@ -23,15 +27,14 @@ print(df[:5])
 # App layout
 app.layout = html.Div([
 
+    # The page title
     html.H1("UNCG - Energy consumption", style={'text-align': 'center'}),
 
+    # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     dcc.Dropdown(id="slct_meter",
-                 options=[
-                     {"label": "Baseball", "value": 'Baseball_results'},
-                     {"label": "BaseballFieldSupportBldg_results", "value": 'BaseballFieldSupportBldg_results'},
-                     {"label": "BaseballStadiumPrkLights_results", "value": 'BaseballStadiumPrkLights_results'}],
+                 options=[{'label': i.split('_results')[0], 'value': i} for i in entries],
                  multi=False,
-                 value='Baseball_results',
+                 value=entries[0],
                  style={'width': "40%"}
                  ),
     dcc.RadioItems(id="slct_period",
@@ -51,35 +54,29 @@ app.layout = html.Div([
                    ],
                    value='hr_consumption'
                    ),
-    html.Div(id='output_container', children=[]),
     html.Br(),
-
-    # dcc.Graph(id='uncg_graph', figure={})
     dcc.Graph(
         id='uncg_graph',
-        figure={
-            'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-            ],
-            'layout': {
-                'title': '2015 hours meter museum'
-            }
-        }
+        hoverData={'points': [{'customdata': 'Japan'}]}
     )
+], style={'width': '100%', 'display': 'inline-block', 'padding': '0 20'})
 
-])
+@app.callback(
+    [Output(component_id='uncg_graph', component_property='figure')],
+    [Input(component_id='slct_meter', component_property='value')],
+    [Input(component_id='slct_period', component_property='value')],
+    [Input(component_id='slct_consum', component_property='value')],
+)
+def update_graph(slct_meter, slct_period, slct_consum):
+    df = pd.read_csv("../data/Analysis/" + slct_meter)
 
+    df['Datetime'] = pd.to_datetime(df["Datetime"])
 
-# @app.callback(
-#     [Output(component_id='uncg_graph', component_property='figure')],
-#
-#     [Input(component_id='slct_meter', component_property='value')],
-#     [Input(component_id='slct_period', component_property='value')],
-#     [Input(component_id='slct_consum', component_property='value')],
-# )
-# def update_graph(slct_meter, slct_period, slct_consum):
-#     pass
-
+    fig = px.scatter(x=df['Datetime'].year,
+                y=df['Actual'],
+                # hover_name=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name']
+                )
+    return fig
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
