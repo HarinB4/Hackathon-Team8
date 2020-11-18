@@ -6,5 +6,8 @@ import pandas as pd
 df = pd.read_csv("../data/Analysis/Baseball_results.csv")
 
 
-print(type(df["Datetime"][0]))
+df['Datetime'] = pd.to_datetime(df["Datetime"])
+print(type(df['Datetime']))
+print(df['Datetime'][105].hour)
+
 

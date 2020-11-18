@@ -13,9 +13,9 @@ app = dash.Dash(__name__)
 # Import and clean data (importing csv into pandas)
 df = pd.read_csv("../data/Analysis/Baseball_results.csv")
 
-df
+df['Datetime'] = pd.to_datetime(df["Datetime"])
 
-
+print(df)
 df.reset_index(inplace=True)
 print(df[:5])
 
@@ -23,7 +23,7 @@ print(df[:5])
 # App layout
 app.layout = html.Div([
 
-    html.H1("UNCG - Energy conception", style={'text-align': 'center'}),
+    html.H1("UNCG - Energy consumption", style={'text-align': 'center'}),
 
     dcc.Dropdown(id="slct_meter",
                  options=[
@@ -34,35 +34,51 @@ app.layout = html.Div([
                  value='Baseball_results',
                  style={'width': "40%"}
                  ),
-    dcc.RadioItems(
-        options=[
-            {'label': 'Hours', 'value': 'Hours'},
-            {'label': 'Day', 'value': 'Day'},
-            {'label': 'Week', 'value': 'Week'},
-            {'label': 'Month', 'value': 'Month'}
-        ],
-        value='Hours'
-    ),
-
+    dcc.RadioItems(id="slct_period",
+                   options=[
+                       {'label': 'Hours', 'value': 'Hours'},
+                       {'label': 'Day', 'value': 'Day'},
+                       {'label': 'Week', 'value': 'Week'},
+                       {'label': 'Month', 'value': 'Month'}
+                   ],
+                   value='Hours'
+                   ),
+    dcc.RadioItems(id="slct_consum",
+                   options=[
+                       {'label': 'Hourly consumption', 'value': 'hr_consumption'},
+                       {'label': 'Total consumption', 'value': 'tot_consumption'},
+                       {'label': 'Average consumption', 'value': 'avr_consumption'}
+                   ],
+                   value='hr_consumption'
+                   ),
     html.Div(id='output_container', children=[]),
     html.Br(),
 
-    # dcc.Graph(id='my_bee_map', figure={})
+    # dcc.Graph(id='uncg_graph', figure={})
     dcc.Graph(
-            id='uncg_graph',
-            figure={
-                'data': [
-                    {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-                    {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-                ],
-                'layout': {
-                    'title': '2015 hours meter museum'
-                }
+        id='uncg_graph',
+        figure={
+            'data': [
+                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
+            ],
+            'layout': {
+                'title': '2015 hours meter museum'
             }
-        )
+        }
+    )
 
 ])
 
+
+# @app.callback(
+#     [Output(component_id='uncg_graph', component_property='figure')],
+#
+#     [Input(component_id='slct_meter', component_property='value')],
+#     [Input(component_id='slct_period', component_property='value')],
+#     [Input(component_id='slct_consum', component_property='value')],
+# )
+# def update_graph(slct_meter, slct_period, slct_consum):
+#     pass
 
 
 # ------------------------------------------------------------------------------
