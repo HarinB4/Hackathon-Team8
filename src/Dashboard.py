@@ -25,6 +25,9 @@ app.layout = html.Div(children=[
 
     # The page title
     html.H1("UNCG - Energy consumption", style={'text-align': 'center'}),
+dcc.Tabs([
+        dcc.Tab(label='Real-Time Interactive Plot', children=[
+
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     dcc.Dropdown(id="slct_meter",
                  options=[{'label': i.split('_results')[0], 'value': i} for i in entries],
@@ -55,10 +58,10 @@ app.layout = html.Div(children=[
                        {'label': 'Hourly consumption', 'value': 'Hourly consumption'},
                        {'label': 'Total consumption', 'value': 'Total consumption'},
                        {'label': 'Average consumption', 'value': 'Average consumption'}
-                   ],
+                    ],
                    value='Hourly consumption'
                    ),
-    html.Br(),
+
     dcc.Graph(
         id='uncg_graph'),
     dcc.RangeSlider(
@@ -70,8 +73,11 @@ app.layout = html.Div(children=[
         },
         value=[df.index.year.min(), df.index.year.max()]
     )
-
-], style={'width': '100%', 'display': 'inline-block', 'padding': '0 20'})
+]),
+dcc.Tab(label='Average Prediction', children=[
+        ])]),
+],
+    style={'width': '100%', 'display': 'inline-block', 'padding': '0 20'})
 
 
 @app.callback(
