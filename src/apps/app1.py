@@ -1,28 +1,13 @@
-import os
-from datetime import datetime
-
-import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State, ALL
-
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
-from src.models import DataLoader
-import asyncio
-from src.app import app
+from src.app import app, loader, entries
 
-loader = DataLoader.DataLoader()
-loop = asyncio.get_event_loop()
-loop.run_until_complete(loader.start())
+df = loader.load_file(entries[0])
 
-entries = os.listdir('../data/Analysis/')
-# ------------------------------------------------------------------------------
-# Import and clean data (importing csv into pandas)
-df = pd.read_csv("../data/Analysis/" + entries[0], parse_dates=['Datetime'],
-                 date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
-
+# Create app1 layout
 layout = html.Div([
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     html.Button("Select a meter", id="add-filter", n_clicks=0),
@@ -35,7 +20,6 @@ layout = html.Div([
         ],
         value=[]
     ),
-
     dcc.RadioItems(id="slct_period",
                    options=[
                        {'label': 'Hours', 'value': 'H'},
@@ -53,7 +37,6 @@ layout = html.Div([
                    ],
                    value='Hourly consumption'
                    ),
-
     dcc.Graph(
         id='uncg_graph'),
     dcc.RangeSlider(
@@ -68,48 +51,46 @@ layout = html.Div([
 ])
 
 
-
+# This callback method is taking the necessary input to plot the desirable graph
 @app.callback(
     Output(component_id='uncg_graph', component_property='figure'),
-
     Output(component_id='time_range', component_property='min'),
     Output(component_id='time_range', component_property='max'),
     Output(component_id='time_range', component_property='marks'),
-    Output(component_id='time_range', component_property='value'),
 
     [Input(component_id='slct_predict', component_property='value')],
     [Input(component_id='slct_period', component_property='value')],
     [Input(component_id='slct_consum', component_property='value')],
     Input({'type': 'slct_meter', 'index': ALL}, 'value'),
-    [State(component_id='time_range', component_property='value')]
-
+    [Input(component_id='time_range', component_property='value')]
 )
 def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range):
-    df = {}
+    # create a dataframe dictionary that hold all the user choice
+    dfs = {}
     for i in range(len(slct_meter)):
-        df[i] = loader.load_file(slct_meter[i])
-    # print(df[0])
+        dfs[i] = loader.load_file(slct_meter[i])
 
-    start_time = df[0][df[0].index.year == time_range[0]]
+    # Take the first meter selected by the user and
+    # set the time range of the graph based on that.
+    start_time = dfs[0][dfs[0].index.year == time_range[0]]
     start_time = start_time.index.min()
-
-    end_time = df[0][df[0].index.year == time_range[1]]
+    end_time = dfs[0][dfs[0].index.year == time_range[1]]
     end_time = end_time.index.max()
 
-    if (type(start_time) == pd._libs.tslibs.nattype.NaTType):
-        start_time = df[0].index.min()
-    print(start_time)
-    print(end_time)
+    # This statement will handle the case where the first meter doesn't contain the minimal year.
+    if type(start_time) == pd._libs.tslibs.nattype.NaTType:
+        start_time = dfs[0].index.min()
 
+    # This will create graph object based on the user filters selection
     fig = go.Figure()
-    for i in range(len(df)):
+    for i in range(len(dfs)):
         if slct_consum == 'Total consumption':
-            dff = df[i].loc[start_time:end_time].resample(slct_period).sum()
+            dff = dfs[i].loc[start_time:end_time].resample(slct_period).sum()
         elif slct_consum == 'Average consumption':
-            dff = df[i].loc[start_time:end_time].resample(slct_period).mean()
+            dff = dfs[i].loc[start_time:end_time].resample(slct_period).mean()
         # temp
         elif slct_consum == 'Hourly consumption':
-            dff = df[i].loc[start_time:end_time]
+            dff = dfs[i].loc[start_time:end_time]
 
         # Add traces
         fig.add_trace(go.Scatter(
@@ -117,15 +98,14 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
             x=dff.index,
             y=dff['Actual'],
             mode='lines',
-            # line=dict(color=COLOR[0]),
         ))
-        # print(slct_predict)
-        # print(len(slct_predict))
-        if ('Include prediction' in slct_predict):
+        # This will add the prediction trace to the graph object when the user select prediction option.
+        if 'Include prediction' in slct_predict:
             fig.add_trace(go.Scatter(x=dff.index, y=dff['Predicted'],
                                      mode='lines',
                                      name='Predicted ' + slct_meter[i]))
-        if ('Include CI' in slct_predict):
+        # This will add the confident interval trace to the graph object when the user select confident interval option.
+        if 'Include CI' in slct_predict:
             fig.add_traces([
                 go.Scatter(
                     name='Upper Bound',
@@ -149,8 +129,6 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
                 )
             ])
 
-        # fig = px.line(x=dff.index, y=dff['Actual'])
-
         fig.update_layout(
             hovermode="x",
             yaxis=dict(
@@ -160,24 +138,35 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
                 title_text='Time',
             )
         )
-    min, max, marks, value = loader.x(slct_meter[i])
+    # This will change the RangeSilder values
+    min, max, marks = range_slider_optimizer(slct_meter[0])
+    return fig, min, max, marks
 
-    return fig, min, max, marks, value
+
+# This helper method will handle the RangeSlider values
+def range_slider_optimizer(slct_meter):
+    df = loader.load_file(slct_meter)
+    min = df.index.year.min()
+    max = df.index.year.max()
+    marks = {i: f'{i}' for i in range(df.index.year.min(), df.index.year.max() + 1, 1)}
+    return min, max, marks
 
 
+# This callback will handle adding multiple meter dropdowns.
 @app.callback(
     Output('dropdown-container', 'children'),
     Input('add-filter', 'n_clicks'),
     State('dropdown-container', 'children'))
 def display_dropdowns(n_clicks, children):
-    print(n_clicks)
-    if n_clicks < 3:
+    number_of_children = 3
+
+    if n_clicks < number_of_children:
         new_dropdown = dcc.Dropdown(
             id={
                 'type': "slct_meter",
                 'index': n_clicks
             },
-            options=[{'label': i.split('_results.csv')[0], 'value': i.split('_results.csv')[0]} for i in entries],
+            options=[{'label': i, 'value': i} for i in entries],
             value='BryanDataCenter',
             style={'display': 'inline-block',
                    'width': '300px'}

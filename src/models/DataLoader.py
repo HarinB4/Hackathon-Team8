@@ -51,22 +51,3 @@ class DataLoader:
     def get_file_names(self):
         # this function returns a list of file names
         return self.file_names
-
-    def x(self, slct_meter):
-        df = self.load_file(slct_meter)
-        min = df.index.year.min()
-        max = df.index.year.max()
-        marks = {i: f'{i}' for i in range(df.index.year.min(), df.index.year.max() + 1, 1)}
-        value = [min, max]
-        return min, max, marks, value
-
-#
-# loader = DataLoader()
-# print(loader.get_file_names())
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(loader.start())
-# print('start')
-# print(loader.load_file('BryanDataCenter_results'))
-# print('second time much faster')
-# print(loader.load_file('BryanDataCenter_results'))
-#

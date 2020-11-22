@@ -1,26 +1,15 @@
-import os
-from datetime import datetime
-
-import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output, State, ALL
+from dash.dependencies import Input, Output
 
-import pandas as pd
 import plotly.graph_objects as go
-from src.app import app
+from src.app import app, loader, entries
 
-
-entries = os.listdir('../data/Analysis/')
-# ------------------------------------------------------------------------------
-# Import and clean data (importing csv into pandas)
-df = pd.read_csv("../data/Analysis/" + entries[0], parse_dates=['Datetime'],
-                 date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
-
+# Create app2 layout
 layout = html.Div([
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     dcc.Dropdown(id="slct_meter2",
-                 options=[{'label': i.split('_results')[0], 'value': i} for i in entries],
+                 options=[{'label': i, 'value': i} for i in entries],
                  multi=False,
                  value=entries[0],
                  style={'width': "40%"}
@@ -40,17 +29,14 @@ layout = html.Div([
         id='uncg_graph2')
 ])
 
-
+# This callback method is taking the necessary input to plot the desirable graph
 @app.callback(
     Output(component_id='uncg_graph2', component_property='figure'),
     [Input(component_id='slct_meter2', component_property='value')],
     [Input(component_id='slct_period2', component_property='value')],
-
 )
 def update_graph2(slct_meter2, slct_period2):
-    df1 = pd.read_csv("../data/Analysis/" + slct_meter2, parse_dates=['Datetime'],
-                      date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
-
+    df1 = loader.load_file(slct_meter2)
     start_time = df1[df1.index.year == 2020]
     start_time = start_time.index.min()
 
@@ -64,16 +50,12 @@ def update_graph2(slct_meter2, slct_period2):
         dff1 = dff1.groupby(level=0).mean()
         list = dff1.index
         time = 'Weeks'
-
-
     elif slct_period2 == 'D':
         dff1 = df1.loc[start_time:].resample(slct_period2).mean()
         dff1.index = dff1.index.dayofweek
         dff1 = dff1.groupby(level=0).mean()
         list = ['Monday', 'Tuesday', "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         time = 'Days'
-
-
     elif slct_period2 == 'H':
         dff1 = df1.loc[start_time:].resample(slct_period2).mean()
         dff1.index = dff1.index.hour
@@ -96,8 +78,6 @@ def update_graph2(slct_meter2, slct_period2):
     fig.add_trace(go.Scatter(x=list, y=dff1['Predicted'],
                              mode='lines',
                              name='Predicted'))
-
-    # fig = px.line(x=dff.index, y=dff['Actual'])
 
     fig.update_layout(
         hovermode="x",

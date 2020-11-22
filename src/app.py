@@ -1,5 +1,16 @@
-import dash
+import asyncio
+import os
 
-# meta_tags are required for the app layout to be mobile responsive
-app = dash.Dash(__name__, suppress_callback_exceptions=True )
+import dash
+from src.models import DataLoader
+
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
+
+loader = DataLoader.DataLoader()
+loop = asyncio.get_event_loop()
+loop.run_until_complete(loader.start())
+
+# This variable will take the files name and save them as a list.
+entries = list(map(lambda sub: sub.split('_results.csv')[0], os.listdir('../data/Analysis/')))
+
 server = app.server
