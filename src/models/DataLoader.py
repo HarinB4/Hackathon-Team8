@@ -43,7 +43,7 @@ class DataLoader:
                 if len(self.data[file_name]) != 0:
                     return self.data[file_name]
             else:
-                return pd.read_csv(self.DIR + file_name + '.csv', parse_dates=['Datetime'],
+                return pd.read_csv(self.DIR + file_name + '_results.csv', parse_dates=['Datetime'],
                                    date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
         except FileNotFoundError:
             return {file_name: pd.DataFrame([])}

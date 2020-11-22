@@ -118,8 +118,7 @@ def update_graph2(slct_meter2, slct_period2):
 
     dff1 = df1.loc[start_time:].resample(slct_period2).mean()
     time = 'Months'
-    list = ['Jan', 'Feb', "March", "April", "May", "June", "July","Aug","Sept","Oct","Nov","Dec"]
-
+    list = ['Jan', 'Feb', "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"]
 
     if slct_period2 == 'W':
         dff1 = df1.loc[start_time:].resample(slct_period2).mean()
@@ -133,7 +132,7 @@ def update_graph2(slct_meter2, slct_period2):
         dff1 = df1.loc[start_time:].resample(slct_period2).mean()
         dff1.index = dff1.index.dayofweek
         dff1 = dff1.groupby(level=0).mean()
-        list = ['Monday','Tuesday',"Wednesday","Thursday","Friday","Saturday","Sunday"]
+        list = ['Monday', 'Tuesday', "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         time = 'Days'
 
 
@@ -142,8 +141,8 @@ def update_graph2(slct_meter2, slct_period2):
         dff1.index = dff1.index.hour
         dff1 = dff1.groupby(level=0).mean()
         list = ['12:00 am', '1:00 am', '2:00 am', '3:00 am', '4:00 am', '5:00 am', '6:00 am', '7:00 am',
-                '8:00 am','9:00 am','10:00 am','11:00 am','12:00 pm', '1:00 pm', '2:00 pm', '3:00 pm', '4:00 pm',
-                '5:00 pm','6:00 pm','7:00 pm','8:00 pm','9:00 pm','10:00 pm','11:00 pm','12:00 pm',]
+                '8:00 am', '9:00 am', '10:00 am', '11:00 am', '12:00 pm', '1:00 pm', '2:00 pm', '3:00 pm', '4:00 pm',
+                '5:00 pm', '6:00 pm', '7:00 pm', '8:00 pm', '9:00 pm', '10:00 pm', '11:00 pm', '12:00 pm', ]
         time = 'Hours'
 
     fig = go.Figure()
@@ -166,7 +165,7 @@ def update_graph2(slct_meter2, slct_period2):
     fig.update_layout(
         hovermode="x",
         yaxis=dict(
-            title_text= 'Average Consumption',
+            title_text='Average Consumption',
         ),
         xaxis=dict(
             title_text=time,
@@ -194,7 +193,7 @@ def update_graph2(slct_meter2, slct_period2):
 def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range):
     df = {}
     for i in range(len(slct_meter)):
-        df[i] = loader.load_file(slct_meter[i].split('.csv')[0])
+        df[i] = loader.load_file(slct_meter[i])
     # print(df[0])
 
     start_time = df[0][df[0].index.year == time_range[0]]
@@ -203,12 +202,10 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
     end_time = df[0][df[0].index.year == time_range[1]]
     end_time = end_time.index.max()
 
-
-    if(type(start_time) == pd._libs.tslibs.nattype.NaTType):
+    if (type(start_time) == pd._libs.tslibs.nattype.NaTType):
         start_time = df[0].index.min()
     print(start_time)
     print(end_time)
-
 
     fig = go.Figure()
     for i in range(len(df)):
@@ -222,18 +219,18 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
 
         # Add traces
         fig.add_trace(go.Scatter(
-            name='Actual',
+            name='Actual ' + slct_meter[i],
             x=dff.index,
             y=dff['Actual'],
             mode='lines',
-            line=dict(color=COLOR[0]),
+            # line=dict(color=COLOR[0]),
         ))
         # print(slct_predict)
         # print(len(slct_predict))
         if ('Include prediction' in slct_predict):
             fig.add_trace(go.Scatter(x=dff.index, y=dff['Predicted'],
                                      mode='lines',
-                                     name='Predicted'))
+                                     name='Predicted ' + slct_meter[i]))
         if ('Include CI' in slct_predict):
             fig.add_traces([
                 go.Scatter(
@@ -269,9 +266,10 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
                 title_text='Time',
             )
         )
-    min, max, marks, value =loader.x(slct_meter[i].split('.csv')[0])
+    min, max, marks, value = loader.x(slct_meter[i])
 
     return fig, min, max, marks, value
+
 
 @app.callback(
     Output('dropdown-container', 'children'),
@@ -285,14 +283,16 @@ def display_dropdowns(n_clicks, children):
                 'type': "slct_meter",
                 'index': n_clicks
             },
-            options=[{'label': i.split('_results.csv')[0], 'value': i} for i in entries],
-            value='BryanDataCenter_results.csv',
+            options=[{'label': i.split('_results.csv')[0], 'value': i.split('_results.csv')[0]} for i in entries],
+            value='BryanDataCenter',
             style={'display': 'inline-block',
-                   'width':'300px'}
+                   'width': '300px'}
         )
         children.append(new_dropdown)
         return children
     return children
+
+
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=True)
