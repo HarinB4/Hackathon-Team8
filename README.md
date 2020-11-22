@@ -41,3 +41,4 @@ setuptools==49.2.1
 future==0.18.2
 ```
 ## Data Source 📜
+Students in the Economics department at UNCG have written scripts to clean, summarize, and predict energy use using statistical models with data on meter readings, local weather conditions, and classroom occupancy. These scripts are written in Python and extract data from various API sources. The scripts are provided as a part of the hackathon. 
