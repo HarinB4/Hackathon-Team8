@@ -22,10 +22,10 @@ layout = html.Div([
     ),
     dcc.RadioItems(id="slct_period",
                    options=[
-                       {'label': 'Hours', 'value': 'H'},
-                       {'label': 'Day', 'value': 'D'},
-                       {'label': 'Week', 'value': 'W'},
-                       {'label': 'Month', 'value': 'M'}
+                       {'label': 'Hours', 'value': 'H', 'disabled': False},
+                       {'label': 'Day', 'value': 'D', 'disabled': True},
+                       {'label': 'Week', 'value': 'W', 'disabled': True},
+                       {'label': 'Month', 'value': 'M', 'disabled': True}
                    ],
                    value='H'
                    ),
@@ -57,12 +57,14 @@ layout = html.Div([
     Output(component_id='time_range', component_property='min'),
     Output(component_id='time_range', component_property='max'),
     Output(component_id='time_range', component_property='marks'),
+    Output(component_id='slct_period', component_property='options'),
 
     [Input(component_id='slct_predict', component_property='value')],
     [Input(component_id='slct_period', component_property='value')],
     [Input(component_id='slct_consum', component_property='value')],
     Input({'type': 'slct_meter', 'index': ALL}, 'value'),
-    [Input(component_id='time_range', component_property='value')]
+    [Input(component_id='time_range', component_property='value')],
+
 )
 def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range):
     # create a dataframe dictionary that hold all the user choice
@@ -142,9 +144,24 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
                 title_text='Time',
             )
         )
+    if slct_consum == 'Hourly consumption':
+        period_option = [
+            {'label': 'Hours', 'value': 'H', 'disabled': False},
+            {'label': 'Day', 'value': 'D', 'disabled': True},
+            {'label': 'Week', 'value': 'W', 'disabled': True},
+            {'label': 'Month', 'value': 'M', 'disabled': True}
+        ]
+    else:
+        period_option = [
+            {'label': 'Hours', 'value': 'H', 'disabled': True},
+            {'label': 'Day', 'value': 'D', 'disabled': False},
+            {'label': 'Week', 'value': 'W', 'disabled': False},
+            {'label': 'Month', 'value': 'M', 'disabled': False}
+        ]
+
     # This will change the RangeSilder values
     min, max, marks = range_slider_optimizer(slct_meter[0])
-    return fig, min, max, marks
+    return fig, min, max, marks, period_option
 
 
 # This helper method will handle the RangeSlider values
