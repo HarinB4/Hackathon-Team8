@@ -46,7 +46,7 @@ class DataLoader:
                 return pd.read_csv(self.DIR + file_name + '_results.csv', parse_dates=['Datetime'],
                                    date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
         except FileNotFoundError:
-            return {file_name: pd.DataFrame([])}
+            return pd.DataFrame([])
 
     def get_file_names(self):
         # this function returns a list of file names

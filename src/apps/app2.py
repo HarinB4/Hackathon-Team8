@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 
 import plotly.graph_objects as go
-from src.app import app, loader, entries
+from src.app import app, loader, entries, COLOR
 
 # Create app2 layout
 layout = html.Div([
@@ -73,17 +73,21 @@ def update_graph2(slct_meter2, slct_period2):
         x=list,
         y=dff1['Actual'],
         mode='markers',
+        marker_color=COLOR[0]['gold']
     ))
 
     fig.add_trace(go.Scatter(x=list, y=dff1['Predicted'],
                              mode='lines',
-                             name='Predicted'))
+                             name='Predicted',
+                             marker_color=COLOR[0]['blue']
+                             ))
 
     fig.update_layout(
         hovermode="x",
         yaxis=dict(
             title_text='Average Consumption',
         ),
+        template='plotly_white',
         xaxis=dict(
             title_text=time,
         )

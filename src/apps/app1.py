@@ -3,7 +3,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State, ALL
 import pandas as pd
 import plotly.graph_objects as go
-from src.app import app, loader, entries
+from src.app import app, loader, entries, COLORS
 
 df = loader.load_file(entries[0])
 
@@ -98,12 +98,15 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
             x=dff.index,
             y=dff['Actual'],
             mode='lines',
+            marker_color=COLORS[i][0]
         ))
         # This will add the prediction trace to the graph object when the user select prediction option.
         if 'Include prediction' in slct_predict:
             fig.add_trace(go.Scatter(x=dff.index, y=dff['Predicted'],
                                      mode='lines',
-                                     name='Predicted ' + slct_meter[i]))
+                                     name='Predicted ' + slct_meter[i],
+                                     marker_color=COLORS[i][1])
+                          )
         # This will add the confident interval trace to the graph object when the user select confident interval option.
         if 'Include CI' in slct_predict:
             fig.add_traces([
@@ -114,7 +117,7 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
                     mode='lines',
                     marker=dict(color="#444"),
                     line=dict(width=0),
-                    showlegend=False
+                    showlegend=False,
                 ),
                 go.Scatter(
                     name='Lower Bound',
@@ -134,6 +137,7 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
             yaxis=dict(
                 title_text=slct_consum,
             ),
+            template='plotly_white',
             xaxis=dict(
                 title_text='Time',
             )
@@ -167,7 +171,7 @@ def display_dropdowns(n_clicks, children):
                 'index': n_clicks
             },
             options=[{'label': i, 'value': i} for i in entries],
-            value='BryanDataCenter',
+            value=entries[0],
             style={'display': 'inline-block',
                    'width': '300px'}
         )
