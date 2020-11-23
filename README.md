@@ -25,5 +25,20 @@
 **Instructor:** [**Dr. Somya Mohanty**](https://github.com/somyamohanty)
 
 ## Requirement 📜
-
+```
+pandas==1.1.4
+plotly==4.12.0
+dash==1.17.0
+numpy==1.19.4
+statsmodels==0.12.1
+pytz==2020.4
+matplotlib==3.3.3
+scipy==1.5.4
+scikit-learn==0.23.2
+pip==20.2.4
+Brotli==1.0.9
+setuptools==49.2.1
+future==0.18.2
+```
 ## Data Source 📜
+Students in the Economics department at UNCG have written scripts to clean, summarize, and predict energy use using statistical models with data on meter readings, local weather conditions, and classroom occupancy. These scripts are written in Python and extract data from various API sources. The scripts are provided as a part of the hackathon. 

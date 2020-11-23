@@ -3,7 +3,7 @@ import pandas as pd
 import asyncio
 import time
 
-
+#This class will handle loading the csv files
 class DataLoader:
     files = None
     data = None
