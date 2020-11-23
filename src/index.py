@@ -24,7 +24,10 @@ tab_selected_style = {
 # The main app layout
 app.layout = html.Div([
     html.Center(
-        html.H1('Funded by the UNCG Green Fund')
+        html.H1('UNCG Energy Consumption')
+    ),
+    html.Center(
+        html.H4('Funded by the UNCG Green Fund')
     ),
     dcc.Location(id='url', refresh=False),
     dcc.Tabs(id='tabs', value='tab-1', children=[
