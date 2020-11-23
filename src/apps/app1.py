@@ -11,7 +11,7 @@ df = loader.load_file(entries['Name'][0])
 # Create app1 layout
 layout = html.Div([
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
-    html.Button("Select a meter", id="add-filter", n_clicks=0),
+    html.Button("Add a meter", id="add-filter", n_clicks=0),
     html.Div(id='dropdown-container', children=[]),
     dcc.Checklist(
         id='slct_predict',
@@ -38,17 +38,23 @@ layout = html.Div([
                    ],
                    value='Hourly consumption'
                    ),
-    dcc.Graph(
-        id='uncg_graph'),
-    dcc.RangeSlider(
-        id='time_range',
-        min=df.index.year.min(),
-        max=df.index.year.max(),
-        marks={
-            i: f'{i}' for i in range(df.index.year.min(), df.index.year.max() + 1, 1)
-        },
-        value=[df.index.year.min(), df.index.year.max()]
-    )
+    dcc.Loading(
+        id="loading-2",
+        children=[
+            dcc.Graph(
+                id='uncg_graph'),
+            dcc.RangeSlider(
+                id='time_range',
+                min=df.index.year.min(),
+                max=df.index.year.max(),
+                marks={
+                    i: f'{i}' for i in range(df.index.year.min(), df.index.year.max() + 1, 1)
+                },
+                value=[df.index.year.min(), df.index.year.max()]
+            )
+        ],
+        type="circle",
+    ),
 ])
 
 

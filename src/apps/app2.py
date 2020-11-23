@@ -25,9 +25,17 @@ layout = html.Div([
                    ],
                    value='MS'
                    ),
-    dcc.Graph(
-        id='uncg_graph2')
+    dcc.Loading(
+        id="loading-2",
+        children=[
+            dcc.Graph(
+                id='uncg_graph2')
+        ],
+        type="circle",
+    )
+
 ])
+
 
 # This callback method is taking the necessary input to plot the desirable graph
 @app.callback(
