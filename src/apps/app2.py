@@ -10,9 +10,9 @@ layout = html.Div([
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     dcc.Dropdown(id="slct_meter2",
                  options=[{'label': entries['Label'][i], 'value': entries['Name'][i]} for i in entries.index],
-                 multi=False,
                  value=entries['Name'][0],
-                 style={'width': "40%"}
+                 style={'display': 'inline-block',
+                        'width': '300px'}
                  ),
 
     dcc.RadioItems(id="slct_period2",
