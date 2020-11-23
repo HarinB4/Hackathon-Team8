@@ -9,9 +9,9 @@ from src.app import app, loader, entries, COLOR
 layout = html.Div([
     # This dropdown is going to loop through the data files, display the names and allow the user to select the meter
     dcc.Dropdown(id="slct_meter2",
-                 options=[{'label': i, 'value': i} for i in entries],
+                 options=[{'label': entries['Label'][i], 'value': entries['Name'][i]} for i in entries.index],
                  multi=False,
-                 value=entries[0],
+                 value=entries['Name'][0],
                  style={'width': "40%"}
                  ),
 

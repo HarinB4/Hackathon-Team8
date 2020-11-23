@@ -3,16 +3,16 @@ import pandas as pd
 import asyncio
 import time
 
-#This class will handle loading the csv files
+
+# This class will handle loading the csv files
 class DataLoader:
     files = None
     data = None
     file_names = None
     DIR = '../data/Analysis/'
-    min = None
-    max = None
-    value = None
-    marks = None
+    DIR2 = '../data/'
+    label_file = 'Meter Names and Labels.xlsx'
+    meters = None
 
     def __init__(self):
         self.files = [file for file in os.listdir(self.DIR) if file.endswith('.csv')]
@@ -21,6 +21,8 @@ class DataLoader:
         self.file_names
         self.file_names.sort()
         self.data = {}
+        self.meters = pd.read_excel(self.DIR2 + self.label_file, 'Sheet1')
+        self.meters['Name'] = self.meters['Name'].str.replace('\'', "").str.strip()
 
     async def start(self):
         # start loading all data function and forget about it
@@ -51,3 +53,6 @@ class DataLoader:
     def get_file_names(self):
         # this function returns a list of file names
         return self.file_names
+
+    def get_labels(self):
+        return self.meters

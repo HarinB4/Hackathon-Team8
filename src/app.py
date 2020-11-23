@@ -13,7 +13,8 @@ loop = asyncio.get_event_loop()
 loop.run_until_complete(loader.start())
 
 # This variable will take the files name and save them as a list.
-entries = list(map(lambda sub: sub.split('_results')[0], loader.get_file_names()))
+# entries = list(map(lambda sub: sub.split('_results')[0], loader.get_file_names()))
+entries = loader.get_labels()
 
 COLOR = [{'blue': '#0f2044', 'gold': '#ffb71b'},
          {'gray': '#bec0c2', 'light_blue': '#00698c'},

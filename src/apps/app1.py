@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from src.app import app, loader, entries, COLORS
 
-df = loader.load_file(entries[0])
+df = loader.load_file(entries['Name'][0])
 
 # Create app1 layout
 layout = html.Div([
@@ -190,8 +190,8 @@ def display_dropdowns(n_clicks, children):
                 'type': "slct_meter",
                 'index': n_clicks
             },
-            options=[{'label': i, 'value': i} for i in entries],
-            value=entries[0],
+            options=[{'label': entries['Label'][i], 'value': entries['Name'][i]} for i in entries.index],
+            value=entries['Name'][0],
             style={'display': 'inline-block',
                    'width': '300px'}
         )
