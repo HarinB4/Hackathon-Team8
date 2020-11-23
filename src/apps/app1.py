@@ -1,5 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
+from dash import dash
 from dash.dependencies import Input, Output, State, ALL
 import pandas as pd
 import plotly.graph_objects as go
@@ -67,6 +68,10 @@ layout = html.Div([
 
 )
 def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range):
+    # in case there is the user didn't select a meter exit the function
+    if len(slct_meter) == 0:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
     # create a dataframe dictionary that hold all the user choice
     dfs = {}
     for i in range(len(slct_meter)):
@@ -74,10 +79,8 @@ def update_graph(slct_predict, slct_period, slct_consum, slct_meter, time_range)
 
     # Take the first meter selected by the user and
     # set the time range of the graph based on that.
-    start_time = dfs[0][dfs[0].index.year == time_range[0]]
-    start_time = start_time.index.min()
-    end_time = dfs[0][dfs[0].index.year == time_range[1]]
-    end_time = end_time.index.max()
+    start_time = dfs[0][dfs[0].index.year == time_range[0]].index.min()
+    end_time = dfs[0][dfs[0].index.year == time_range[1]].index.max()
 
     # This statement will handle the case where the first meter doesn't contain the minimal year.
     if type(start_time) == pd._libs.tslibs.nattype.NaTType:
