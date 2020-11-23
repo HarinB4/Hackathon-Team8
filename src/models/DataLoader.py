@@ -1,11 +1,13 @@
 import os
 import pandas as pd
 import asyncio
+from threading import Thread
+
 import time
 
 
 # This class will handle loading the csv files
-class DataLoader:
+class DataLoader(Thread):
     files = None
     data = None
     file_names = None
@@ -13,30 +15,23 @@ class DataLoader:
     DIR2 = '../data/'
     label_file = 'Meter Names and Labels.xlsx'
     meters = None
+    files = [file for file in os.listdir(DIR) if file.endswith('.csv')]
+    # turn filename.csv to filename for all files
+    file_names = [os.path.splitext(os.path.basename(x))[0] for x in files]
+    file_names.sort()
+    data = {}
+    meters = pd.read_excel(DIR2 + label_file, 'Sheet1')
+    meters['Name'] = meters['Name'].str.replace('\'', "").str.strip()
 
-    def __init__(self):
-        self.files = [file for file in os.listdir(self.DIR) if file.endswith('.csv')]
-        # turn filename.csv to filename for all files
-        self.file_names = [os.path.splitext(os.path.basename(x))[0] for x in self.files]
-        self.file_names
-        self.file_names.sort()
-        self.data = {}
-        self.meters = pd.read_excel(self.DIR2 + self.label_file, 'Sheet1')
-        self.meters['Name'] = self.meters['Name'].str.replace('\'', "").str.strip()
-
-    async def start(self):
-        # start loading all data function and forget about it
-        asyncio.ensure_future(self.load_all_data())
-
-    async def load_all_data(self):
+    def run(self):
         # this function loads all data in the Analysis directory
-        await asyncio.sleep(1)
         if self.data == {}:
             for i in range(len(self.file_names)):
                 try:
                     self.data[self.file_names[i]] = pd.read_csv(self.DIR + self.files[i], parse_dates=['Datetime'])
                 except FileNotFoundError:
                     self.data[self.file_names[i]] = pd.DataFrame()
+                time.sleep(3)
 
     def load_file(self, file_name) -> pd.DataFrame:
         # this function loads a single specified file
@@ -45,8 +40,10 @@ class DataLoader:
                 if len(self.data[file_name]) != 0:
                     return self.data[file_name]
             else:
-                return pd.read_csv(self.DIR + file_name + '_results.csv', parse_dates=['Datetime'],
-                                   date_parser=lambda col: pd.to_datetime(col, utc=True), index_col='Datetime')
+                self.data[file_name] = pd.read_csv(self.DIR + file_name + '_results.csv', parse_dates=['Datetime'],
+                                                   date_parser=lambda col: pd.to_datetime(col, utc=True),
+                                                   index_col='Datetime')
+                return self.data[file_name]
         except FileNotFoundError:
             return pd.DataFrame([])
 

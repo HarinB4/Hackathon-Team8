@@ -3,17 +3,20 @@ import os
 
 import dash
 from src.models import DataLoader
+from threading import Thread
 
 external_stylesheets = ['assets/bWLwgP.css']
 
 app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=external_stylesheets)
 
 loader = DataLoader.DataLoader()
-loop = asyncio.get_event_loop()
-loop.run_until_complete(loader.start())
+# loading thread will stop when main program stops
+loader.daemon = True
+# start loading data in background
+loader.start()
+
 
 # This variable will take the files name and save them as a list.
-# entries = list(map(lambda sub: sub.split('_results')[0], loader.get_file_names()))
 entries = loader.get_labels()
 
 COLOR = [{'blue': '#0f2044', 'gold': '#ffb71b'},
@@ -24,3 +27,4 @@ COLORS = [['#0f2044', '#ffb71b'],
           ['#a00c30', '#92d1b3']]
 
 server = app.server
+
